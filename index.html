@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rome Calvin Monteras | IT Portfolio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+    .game-container {
+            text-align: center;
+            max-width: 100%;
+        }
+
+        h1 {
+            color: #9bbc0f;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .score-board {
+            background-color: #0f380f;
+            color: #9bbc0f;
+            padding: 10px 20px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        canvas {
+            background-color: #9bbc0f;
+            border: 8px solid #0f380f;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            max-width: 100%;
+            height: auto;
+        }
+
+        .mobile-controls {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 80px);
+            grid-template-rows: repeat(3, 80px);
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .control-btn {
+            background-color: #0f380f;
+            color: #9bbc0f;
+            border: 3px solid #9bbc0f;
+            border-radius: 10px;
+            font-size: 2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.1s;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn:active {
+            background-color: #9bbc0f;
+            color: #0f380f;
+            transform: scale(0.95);
+        }
+
+        .control-btn.up {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        .control-btn.left {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        .control-btn.center {
+            grid-column: 2;
+            grid-row: 2;
+            background-color: #306230;
+            border-color: #0f380f;
+            font-size: 1em;
+            cursor: default;
+        }
+
+        .control-btn.right {
+            grid-column: 3;
+            grid-row: 2;
+        }
+
+        .control-btn.down {
+            grid-column: 2;
+            grid-row: 3;
+        }
+
+        .keyboard-controls {
+            margin-top: 20px;
+            color: #9bbc0f;
+            font-size: 0.9em;
+        }
+
+        .keyboard-controls p {
+            margin: 5px 0;
+        }
+
+        #gameOverScreen {
+            position: absolute;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(15, 56, 15, 0.9);
+            color: #9bbc0f;
+            border-radius: 10px;
+            padding: 40px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+
+        #gameOverScreen.show {
+            display: flex;
+        }
+
+        #gameOverScreen h2 {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        #gameOverScreen p {
+            font-size: 1.5em;
+            margin: 10px 0;
+        }
+
+        .restart-btn {
+            background-color: #9bbc0f;
+            color: #0f380f;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .restart-btn:active {
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            canvas {
+                width: 100%;
+                height: auto;
+            }
+
+            .mobile-controls {
+                grid-template-columns: repeat(3, 70px);
+                grid-template-rows: repeat(3, 70px);
+            }
+
+            .control-btn {
+                font-size: 1.5em;
+            }
+
+            .keyboard-controls {
+                font-size: 0.8em;
+            }
+
+            #gameOverScreen {
+                padding: 30px;
+            }
+
+            #gameOverScreen h2 {
+                font-size: 2em;
+            }
+
+            #gameOverScreen p {
+                font-size: 1.2em;
+            }
+        }
+:root {
+    --primary: #6a0dad;
+    --secondary: #9b5de5;
+    --accent: #f9c74f;
+    --dark: #1e1e2f;
+    --light: #f6f4fb;
+    --white: #ffffff;
+    --shadow: rgba(0, 0, 0, 0.15);
+    /* CHANGED BACKGROUND COLOR HERE */
+    --background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: var(--background);
+    background-attachment: fixed;
+    color: #f6f4fb;
+    line-height: 1.6;
+    scroll-behavior: smooth;
+    position: relative;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    /* ADJUSTED OVERLAY GLOW COLORS TO MATCH NEW BACKGROUND */
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(56, 189, 248, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(249, 199, 79, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+a {
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+/* Header */
+header {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: var(--white);
+    padding: 120px 10% 80px;
+    text-align: center;
+    border-bottom-left-radius: 50px;
+    border-bottom-right-radius: 50px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    z-index: 1;
+}
+
+header::before {
+    content: "";
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background: 
+        radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 50px 50px, 30px 30px;
+    top: -50%;
+    left: -50%;
+    animation: movePattern 20s linear infinite;
+}
+
+@keyframes movePattern {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(50px, 50px); }
+}
+
+header h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+    animation: fadeInDown 0.8s ease;
+}
+
+header p {
+    font-size: 1.3rem;
+    font-weight: 500;
+    margin-bottom: 35px;
+    opacity: 0.95;
+    animation: fadeInUp 0.8s ease 0.2s both;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Navigation */
+nav {
+    animation: fadeIn 0.8s ease 0.4s both;
+}
+
+nav a {
+    margin: 0 15px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 10px 20px;
+    border-radius: 25px;
+    color: var(--white);
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+}
+
+nav a::before {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 100%;
+    top: 0;
+    left: 50%;
+    background: rgba(249, 199, 79, 0.2);
+    transition: 0.4s ease;
+    transform: translateX(-50%);
+    border-radius: 25px;
+    z-index: -1;
+}
+
+nav a:hover::before {
+    width: 100%;
+}
+
+nav a:hover {
+    color: var(--accent);
+    transform: translateY(-3px);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Sections */
+section {
+    padding: 80px 10%;
+    max-width: 1200px;
+    margin: 40px auto;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    border-radius: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 1;
+    animation: slideUp 0.6s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+section h2 {
+    font-size: 2.8rem;
+    margin-bottom: 45px;
+    color: var(--accent);
+    position: relative;
+    display: inline-block;
+}
+
+section h2::after {
+    content: "";
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(90deg, var(--secondary), var(--accent));
+    position: absolute;
+    bottom: -15px;
+    left: 0;
+    border-radius: 5px;
+    animation: expandWidth 0.8s ease;
+}
+
+@keyframes expandWidth {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+/* About Section */
+#about p {
+    font-size: 1.15rem;
+    line-height: 1.9;
+    color: #e8e6f0;
+}
+
+/* Skills */
+.skills ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.skills li {
+    padding: 15px 28px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: var(--white);
+    border-radius: 30px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    box-shadow: 0 8px 20px var(--shadow);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.skills li::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
+}
+
+.skills li:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.skills li:hover {
+    transform: translateY(-8px) scale(1.08);
+    box-shadow: 0 15px 30px var(--shadow);
+}
+
+/* Projects */
+.projects {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 35px;
+}
+
+.project-card {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+    padding: 35px 30px;
+    border-radius: 25px;
+    box-shadow: 0 12px 35px var(--shadow);
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.project-card::before {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: linear-gradient(135deg, rgba(155, 93, 229, 0.3), rgba(249, 199, 79, 0.3));
+    transition: width 0.5s ease;
+    z-index: 0;
+}
+
+.project-card:hover::before {
+    width: 100%;
+}
+
+.project-card h3, .project-card p, .project-card .btn {
+    position: relative;
+    z-index: 1;
+}
+
+.project-card:hover {
+    transform: translateY(-15px) scale(1.02);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+}
+
+.project-card h3 {
+    margin-top: 0;
+    color: var(--accent);
+    font-size: 1.6rem;
+    margin-bottom: 15px;
+}
+
+.project-card p {
+    font-size: 1.05rem;
+    margin-top: 10px;
+    color: #eee;
+    line-height: 1.7;
+}
+
+/* Certifications */
+.certifications ul {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+}
+
+.certifications li {
+    padding: 18px 22px;
+    background: rgba(155, 93, 229, 0.15);
+    border-left: 4px solid var(--accent);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    color: #e8e6f0;
+}
+
+.certifications li:hover {
+    background: rgba(155, 93, 229, 0.25);
+    transform: translateX(8px);
+    border-left-color: var(--secondary);
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: var(--white);
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px var(--shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.5s ease, height 0.5s ease;
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 15px 30px var(--shadow);
+}
+
+/* Contact Section */
+#contact p {
+    font-size: 1.15rem;
+    margin: 15px 0;
+}
+
+#contact p a {
+    color: var(--accent);
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+#contact p a:hover {
+    color: var(--secondary);
+    text-decoration: underline;
+}
+
+/* Footer */
+footer {
+    background: var(--dark);
+    color: var(--white);
+    text-align: center;
+    padding: 50px 10%;
+    border-top: 2px solid rgba(155, 93, 229, 0.3);
+    position: relative;
+    z-index: 1;
+}
+
+footer a {
+    color: var(--accent);
+    margin: 0 15px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+footer a:hover {
+    color: var(--secondary);
+    transform: scale(1.15);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2.5rem;
+    }
+
+    nav a {
+        display: block;
+        margin: 12px 0;
+    }
+
+    section {
+        padding: 60px 6%;
+        margin: 30px auto;
+    }
+
+    section h2 {
+        font-size: 2.2rem;
+    }
+
+    .projects {
+        grid-template-columns: 1fr;
+    }
+
+    .certifications ul {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Rome Calvin Monteras</h1>
+    <p>IT Student | Aspiring Web Developer</p>
+    <nav>
+        <a href="#about">About</a>
+        <a href="#skills">Skills</a>
+        <a href="#projects">Projects</a>
+        <a href="#certifications">Certifications</a>
+        <a href="#contact">Contact</a>
+    </nav>
+</header>
+
+<section id="about">
+    <h2>About Me</h2>
+    <p>
+        ’m Rome Calvin Monteras, a second-year IT student specializing in Game Development. I’m enthusiastic about learning and keen to expand my skills in web development and other areas of technology. Beyond academics, I stay active through cycling, going to the gym, and playing basketball. I’m outgoing, enjoy supporting others, and thrive both working independently and collaborating within a team.
+    </p>
+</section>
+
+<section id="skills" class="skills">
+    <h2>Skills</h2>
+    <ul>
+        <li>HTML</li>
+        <li>CSS</li>
+        <li>JavaScript</li>
+        <li>Python</li>
+        <li>Git & GitHub</li>
+        <li>React</li>
+        <li>Node.js</li>
+    </ul>
+</section>
+
+<section id="projects">
+    <h2>Projects</h2>
+    <div class="projects">
+        <div class="project-card">
+            <h3>Personal Portfolio</h3>
+            <p>A responsive portfolio website showcasing my skills, projects, and achievements.</p>
+            <a class="btn" href="#" target="_blank">View Project</a>
+        </div>
+
+        <div class="project-card">
+            <h3>RUSH Game</h3>
+            <p>An interactive web-based game developed using HTML, CSS, and JavaScript.</p>
+            <a class="btn" href="#" target="_blank">Play Game</a>
+        </div>
+    </div>
+</section>
+
+<section id="certifications" class="certifications">
+    <h2>Certifications</h2>
+    <ul>
+        <li>Microsoft Digital Literacy</li>
+        <li>Wi-Fi 101 and Digital Thumbprint Program</li>
+        <li>SMART Android Mobile Apps Development for Beginners</li>
+        <li>SMART Technopreneurship 101</li>
+        <li>Introduction to CCS</li>
+        <li>Installing and Configuring Computer Systems</li>
+        <li>Setting Up Computer Networks</li>
+        <li>Setting Up Computer Servers</li>
+        <li>Maintaining Computer Systems and Networks</li>
+        <li>Introduction to Visual Graphic Design</li>
+        <li>Developing Designs for a Logo</li>
+        <li>Developing Designs for Print Media</li>
+        <li>Developing Designs for User Experience</li>
+        <li>Developing Designs for User Interface</li>
+        <li>Developing Designs for Product Packaging</li>
+        <li>Designing Booth and Product/Window Display</li>
+    </ul>
+</section>
+
+<section id="contact">
+  <div class="game-container">
+        <h1>🐍 SNAKE</h1>
+        <div class="score-board">
+            Score: <span id="score">0</span>
+        </div>
+        <div style="position: relative;">
+            <canvas id="gameCanvas" width="500" height="500"></canvas>
+            <div id="gameOverScreen">
+                <h2>GAME OVER!</h2>
+                <p>Final Score: <span id="finalScore">0</span></p>
+                <button class="restart-btn" onclick="restartGame()">PLAY AGAIN</button>
+            </div>
+        </div>
+        
+        <!-- Mobile Control Buttons -->
+        <div class="mobile-controls">
+            <button class="control-btn up" id="btnUp">▲</button>
+            <button class="control-btn left" id="btnLeft">◄</button>
+            <div class="control-btn center">🐍</div>
+            <button class="control-btn right" id="btnRight">►</button>
+            <button class="control-btn down" id="btnDown">▼</button>
+        </div>
+
+        <div class="keyboard-controls">
+            <p><strong>Desktop:</strong> Arrow Keys or WASD</p>
+            <p><strong>Mobile:</strong> Use buttons above</p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const finalScoreElement = document.getElementById('finalScore');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+
+        const TILE_SIZE = 20;
+        const GRID_WIDTH = 25;
+        const GRID_HEIGHT = 25;
+        const GAME_SPEED = 100;
+
+        let snake = [];
+        let food = {};
+        let direction = 'RIGHT';
+        let nextDirection = 'RIGHT';
+        let running = false;
+        let gameOver = false;
+        let score = 0;
+        let gameLoop = null;
+
+        function init() {
+            canvas.width = GRID_WIDTH * TILE_SIZE;
+            canvas.height = GRID_HEIGHT * TILE_SIZE;
+            setupMobileControls();
+            startGame();
+        }
+
+        function setupMobileControls() {
+            const btnUp = document.getElementById('btnUp');
+            const btnDown = document.getElementById('btnDown');
+            const btnLeft = document.getElementById('btnLeft');
+            const btnRight = document.getElementById('btnRight');
+
+            // Prevent default touch behavior
+            [btnUp, btnDown, btnLeft, btnRight].forEach(btn => {
+                btn.addEventListener('touchstart', (e) => e.preventDefault());
+            });
+
+            btnUp.addEventListener('click', () => {
+                if (running && direction !== 'DOWN') nextDirection = 'UP';
+            });
+
+            btnDown.addEventListener('click', () => {
+                if (running && direction !== 'UP') nextDirection = 'DOWN';
+            });
+
+            btnLeft.addEventListener('click', () => {
+                if (running && direction !== 'RIGHT') nextDirection = 'LEFT';
+            });
+
+            btnRight.addEventListener('click', () => {
+                if (running && direction !== 'LEFT') nextDirection = 'RIGHT';
+            });
+
+            // Touch support for better mobile experience
+            btnUp.addEventListener('touchstart', (e) => {
+                if (running && direction !== 'DOWN') nextDirection = 'UP';
+            });
+
+            btnDown.addEventListener('touchstart', (e) => {
+                if (running && direction !== 'UP') nextDirection = 'DOWN';
+            });
+
+            btnLeft.addEventListener('touchstart', (e) => {
+                if (running && direction !== 'RIGHT') nextDirection = 'LEFT';
+            });
+
+            btnRight.addEventListener('touchstart', (e) => {
+                if (running && direction !== 'LEFT') nextDirection = 'RIGHT';
+            });
+        }
+
+        function startGame() {
+            snake = [
+                { x: 5, y: 5 },
+                { x: 4, y: 5 },
+                { x: 3, y: 5 }
+            ];
+            
+            direction = 'RIGHT';
+            nextDirection = 'RIGHT';
+            score = 0;
+            gameOver = false;
+            running = true;
+            
+            updateScore();
+            gameOverScreen.classList.remove('show');
+            spawnFood();
+            
+            if (gameLoop) clearInterval(gameLoop);
+            gameLoop = setInterval(update, GAME_SPEED);
+        }
+
+        function spawnFood() {
+            let validPosition = false;
+            while (!validPosition) {
+                food = {
+                    x: Math.floor(Math.random() * GRID_WIDTH),
+                    y: Math.floor(Math.random() * GRID_HEIGHT)
+                };
+                validPosition = !snake.some(segment => 
+                    segment.x === food.x && segment.y === food.y
+                );
+            }
+        }
+
+        function update() {
+            if (!running) return;
+
+            direction = nextDirection;
+            const head = { ...snake[0] };
+
+            switch (direction) {
+                case 'UP': head.y--; break;
+                case 'DOWN': head.y++; break;
+                case 'LEFT': head.x--; break;
+                case 'RIGHT': head.x++; break;
+            }
+
+            // Check wall collision
+            if (head.x < 0 || head.x >= GRID_WIDTH || 
+                head.y < 0 || head.y >= GRID_HEIGHT) {
+                endGame();
+                return;
+            }
+
+            // Check self collision
+            if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                endGame();
+                return;
+            }
+
+            snake.unshift(head);
+
+            // Check if food is eaten
+            if (head.x === food.x && head.y === food.y) {
+                score += 10;
+                updateScore();
+                spawnFood();
+            } else {
+                snake.pop();
+            }
+
+            draw();
+        }
+
+        function draw() {
+            // Clear canvas
+            ctx.fillStyle = '#9bbc0f';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw food
+            ctx.fillStyle = '#306230';
+            ctx.fillRect(
+                food.x * TILE_SIZE,
+                food.y * TILE_SIZE,
+                TILE_SIZE,
+                TILE_SIZE
+            );
+
+            // Draw snake
+            snake.forEach((segment, index) => {
+                ctx.fillStyle = index === 0 ? '#0f380f' : '#306230';
+                ctx.fillRect(
+                    segment.x * TILE_SIZE,
+                    segment.y * TILE_SIZE,
+                    TILE_SIZE,
+                    TILE_SIZE
+                );
+            });
+        }
+
+        function endGame() {
+            running = false;
+            gameOver = true;
+            clearInterval(gameLoop);
+            finalScoreElement.textContent = score;
+            gameOverScreen.classList.add('show');
+        }
+
+        function updateScore() {
+            scoreElement.textContent = score;
+        }
+
+        function restartGame() {
+            startGame();
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (gameOver && e.code === 'Space') {
+                restartGame();
+                return;
+            }
+
+            if (!running) return;
+
+            switch (e.key) {
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    if (direction !== 'DOWN') nextDirection = 'UP';
+                    e.preventDefault();
+                    break;
+                case 'ArrowDown':
+                case 's':
+                case 'S':
+                    if (direction !== 'UP') nextDirection = 'DOWN';
+                    e.preventDefault();
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    if (direction !== 'RIGHT') nextDirection = 'LEFT';
+                    e.preventDefault();
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    if (direction !== 'LEFT') nextDirection = 'RIGHT';
+                    e.preventDefault();
+                    break;
+            }
+        });
+
+        // Start the game when page loads
+        init();
+    </script>
+</section>
+
+<section id="contact">
+    <h2>Contact</h2>
+    <p>Email: <a href="mailto:monterasromecalvin@gmail.com">monterasromecalvin@gmail.com/a></p>
+    <p>Instagram: <a href="https://www.instagram.com/rome_mntrs/" target="_blank">@rome_mntrs</a></p>
+    <p>Facebook: <a href="https://web.facebook.com/romecalvin.monteras.3" target="_blank">Rome Calvin Montras</a></p>
+</section>
+
+<footer>
+    <p>&copy; 2026 Rome Calvin Monteras | All Rights Reserved</p>
+    <p>
+        <a href="#">GitHub</a> |
+        <a href="#">LinkedIn</a>
+    </p>
+</footer>
+
+</body>
+</html>
