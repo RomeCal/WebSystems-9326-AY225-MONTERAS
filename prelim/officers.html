@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>JPCS Officers</title>
+    <title>JPCS | Officers</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <nav>
-        <div class="logo">JPCS</div>
+        <div class="logo">JPCS.</div>
         <ul>
             <li><a href="index.html">Home</a></li>
             <li><a href="about.html">About</a></li>
@@ -18,30 +18,12 @@
     </nav>
 
     <div class="container">
-        <h1 style="text-align: center;">Meet Our Leaders</h1>
-        <div class="grid">
-            <!-- Profile Card 1 -->
-            <div class="card officer-card" onclick="alert('Specialization: Cloud Computing')">
-                <img src="https://ui-avatars.com/api/?name=Juan+Delacruz&background=00d4ff&color=fff" style="border-radius: 50%; width: 100px; margin-bottom: 1rem;">
-                <h3>Juan Dela Cruz</h3>
-                <p style="color: var(--primary);">President</p>
-                <p style="font-size: 0.8rem; margin-top: 10px;">Click for info</p>
-            </div>
-            <!-- Profile Card 2 -->
-            <div class="card officer-card" onclick="alert('Specialization: UI/UX Design')">
-                <img src="https://ui-avatars.com/api/?name=Maria+Santos&background=00d4ff&color=fff" style="border-radius: 50%; width: 100px; margin-bottom: 1rem;">
-                <h3>Maria Santos</h3>
-                <p style="color: var(--primary);">Vice President</p>
-                <p style="font-size: 0.8rem; margin-top: 10px;">Click for info</p>
-            </div>
-             <!-- Profile Card 3 -->
-             <div class="card officer-card" onclick="alert('Specialization: Cyber Security')">
-                <img src="https://ui-avatars.com/api/?name=Alex+Reyes&background=00d4ff&color=fff" style="border-radius: 50%; width: 100px; margin-bottom: 1rem;">
-                <h3>Alex Reyes</h3>
-                <p style="color: var(--primary);">Secretary</p>
-                <p style="font-size: 0.8rem; margin-top: 10px;">Click for info</p>
-            </div>
-        </div>
+        <h1 style="text-align: center; margin-bottom: 3rem;">Executive Board 2024</h1>
+        <!-- Dynamic Content -->
+        <div id="officer-grid" class="grid"></div>
     </div>
+
+    <div id="toast-container"></div>
+    <script src="script.js"></script>
 </body>
 </html>
