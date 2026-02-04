@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>JPCS Registration</title>
+    <title>JPCS | Register</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <nav>
-        <div class="logo">JPCS</div>
+        <div class="logo">JPCS.</div>
         <ul>
             <li><a href="index.html">Home</a></li>
             <li><a href="about.html">About</a></li>
@@ -18,33 +18,26 @@
     </nav>
 
     <div class="container" style="max-width: 600px;">
-        <h1>Apply for Membership</h1>
-        <p>Complete the form below. Your progress is saved automatically!</p>
-        
-        <form id="membershipForm">
-            <label>Full Name</label>
-            <input type="text" id="regName" placeholder="Juan Dela Cruz">
-            <p id="nameError" class="error-text">Please enter your full name (min 5 chars).</p>
+        <div class="card">
+            <h1>Join the Society</h1>
+            <p style="margin-bottom: 2rem; opacity: 0.7;">Fill out the form below to start your application.</p>
+            
+            <form id="membershipForm">
+                <label>Full Name</label>
+                <input type="text" id="regName" placeholder="Enter full name" required>
 
-            <label>Email Address</label>
-            <input type="email" id="regEmail" placeholder="juan@student.edu.ph">
-            <p id="emailError" class="error-text">Please enter a valid email address.</p>
+                <label>Student Email</label>
+                <input type="email" id="regEmail" placeholder="user@university.edu.ph" required>
 
-            <label>Student ID</label>
-            <input type="text" id="regID" placeholder="2024-10001">
+                <label>Student Number</label>
+                <input type="text" id="regID" placeholder="2024-XXXXX" required>
 
-            <label>Year Level</label>
-            <select id="regYear">
-                <option value="1">1st Year</option>
-                <option value="2">2nd Year</option>
-                <option value="3">3rd Year</option>
-                <option value="4">4th Year</option>
-            </select>
-
-            <button type="submit" class="btn" style="width: 100%; margin-top: 1rem;">Submit Application</button>
-        </form>
+                <button type="submit" class="btn" style="width: 100%; margin-top: 1rem;">Submit Application</button>
+            </form>
+        </div>
     </div>
 
+    <div id="toast-container"></div>
     <script src="script.js"></script>
 </body>
 </html>
