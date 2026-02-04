@@ -1,99 +1,138 @@
-// --- EVENT DATA ---
-const eventsData = [
-    { id: 1, title: "Web Mastery 2024", cat: "tech", date: "Oct 15, 2026", desc: "A deep dive into modern CSS and JavaScript frameworks." },
-    { id: 2, title: "Code Wars: Algorithm Challenge", cat: "comp", date: "Oct 22, 2026", desc: "Test your logic in this fast-paced coding competition." },
-    { id: 3, title: "AI & Future Trends", cat: "tech", date: "Nov 05, 2026", desc: "Understanding how Generative AI is changing the IT landscape." },
-    { id: 4, title: "Hackathon Finals", cat: "comp", date: "Dec 10, 2026", desc: "The final showdown of the top dev teams in the university." }
-];
+/**
+ * JPCS ADVANCED WEB SYSTEM ENGINE
+ */
 
-// --- RENDER EVENTS ---
-function renderEvents(category = 'all') {
-    const eventContainer = document.getElementById('event-list');
-    if (!eventContainer) return; // Exit if not on events page
+// --- 1. DATA STATE ---
+const STATE = {
+    events: [
+        { id: 1, title: "Web Mastery 2024", cat: "tech", date: "2024-11-20", desc: "Master the latest in frontend frameworks and CSS architecture." },
+        { id: 2, title: "Code Wars Hackathon", cat: "comp", date: "2024-12-05", desc: "24-hour coding challenge to solve community issues." },
+        { id: 3, title: "Cloud Fundamentals", cat: "tech", date: "2024-10-15", desc: "Introduction to AWS and Azure infrastructure." },
+        { id: 4, title: "Member Mixer Night", cat: "social", date: "2024-09-30", desc: "Networking and games for new members." }
+    ],
+    officers: [
+        { name: "Juan Dela Cruz", role: "President", specialty: "Fullstack Dev" },
+        { name: "Maria Santos", role: "VP Internal", specialty: "UI/UX Design" },
+        { name: "Dev Lee", role: "Tech Lead", specialty: "Cybersecurity" }
+    ],
+    filters: {
+        search: '',
+        category: 'all',
+        time: 'all'
+    }
+};
 
-    eventContainer.innerHTML = '';
+// --- 2. UTILITIES (Toasts & Modals) ---
+const showToast = (msg) => {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerText = msg;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+};
 
-    const filtered = category === 'all' 
-        ? eventsData 
-        : eventsData.filter(ev => ev.cat === category);
-
-    filtered.forEach(ev => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-            <h3>${ev.title}</h3>
-            <p>${ev.date}</p>
-            <button class="btn" style="margin-top:10px" onclick="openModal(${ev.id})">Details</button>
-        `;
-        eventContainer.appendChild(card);
-    });
-}
-
-// --- FILTER LOGIC ---
-function filterEvents(category) {
-    renderEvents(category);
-}
-
-// --- MODAL LOGIC ---
-function openModal(id) {
-    const event = eventsData.find(e => e.id === id);
-    document.getElementById('modalTitle').innerText = event.title;
-    document.getElementById('modalDesc').innerText = event.desc;
-    document.getElementById('modalDate').innerText = "Schedule: " + event.date;
+const openModal = (title, desc) => {
+    document.getElementById('modalTitle').innerText = title;
+    document.getElementById('modalDesc').innerText = desc;
     document.getElementById('eventModal').style.display = 'flex';
-}
+};
 
-function closeModal() {
+const closeModal = () => {
     document.getElementById('eventModal').style.display = 'none';
-}
+};
 
-// --- FORM VALIDATION & LOCAL STORAGE ---
-const regForm = document.getElementById('membershipForm');
-if (regForm) {
-    const nameInp = document.getElementById('regName');
-    const emailInp = document.getElementById('regEmail');
+// --- 3. RENDERING ENGINE ---
+const renderEvents = () => {
+    const list = document.getElementById('event-list');
+    if (!list) return;
 
-    // Load progress from LocalStorage
-    nameInp.value = localStorage.getItem('jpcs_name') || '';
-    emailInp.value = localStorage.getItem('jpcs_email') || '';
-
-    // Auto-save progress
-    regForm.addEventListener('input', () => {
-        localStorage.setItem('jpcs_name', nameInp.value);
-        localStorage.setItem('jpcs_email', emailInp.value);
+    const today = new Date();
+    
+    const filtered = STATE.events.filter(ev => {
+        const matchesSearch = ev.title.toLowerCase().includes(STATE.filters.search.toLowerCase());
+        const matchesCat = STATE.filters.category === 'all' || ev.cat === STATE.filters.category;
+        const matchesTime = STATE.filters.time === 'all' || new Date(ev.date) >= today;
+        return matchesSearch && matchesCat && matchesTime;
     });
 
-    // Form Submission
-    regForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        let isValid = true;
+    list.innerHTML = filtered.map(ev => `
+        <div class="card">
+            <span style="color: var(--primary); font-size: 0.8rem; font-weight: bold;">${ev.cat.toUpperCase()}</span>
+            <h3 style="margin: 10px 0;">${ev.title}</h3>
+            <p style="opacity: 0.7; font-size: 0.9rem; margin-bottom: 15px;">Date: ${ev.date}</p>
+            <button class="btn" onclick="openModal('${ev.title}', '${ev.desc}')">View Details</button>
+        </div>
+    `).join('');
+};
 
-        // Name Check
-        if (nameInp.value.length < 5) {
-            document.getElementById('nameError').style.display = 'block';
-            isValid = false;
-        } else {
-            document.getElementById('nameError').style.display = 'none';
-        }
+const renderOfficers = () => {
+    const grid = document.getElementById('officer-grid');
+    if (!grid) return;
 
-        // Email Check
-        if (!emailInp.value.includes('@')) {
-            document.getElementById('emailError').style.display = 'block';
-            isValid = false;
-        } else {
-            document.getElementById('emailError').style.display = 'none';
-        }
+    grid.innerHTML = STATE.officers.map(o => `
+        <div class="card" style="text-align: center;" onclick="showToast('Expertise: ${o.specialty}')">
+            <div style="width: 100px; height: 100px; background: var(--primary); border-radius: 50%; margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center; color: black; font-weight: bold; font-size: 1.5rem;">${o.name.charAt(0)}</div>
+            <h3>${o.name}</h3>
+            <p style="color: var(--primary); font-weight: bold;">${o.role}</p>
+            <p style="font-size: 0.8rem; margin-top: 10px; opacity: 0.6;">Click for specialty</p>
+        </div>
+    `).join('');
+};
 
-        if (isValid) {
-            alert("Success! Welcome to JPCS, " + nameInp.value);
-            localStorage.removeItem('jpcs_name');
-            localStorage.removeItem('jpcs_email');
-            regForm.reset();
-        }
-    });
-}
-
-// Initialize
-window.onload = () => {
+// --- 4. FILTERS & SEARCH ---
+const updateFilters = () => {
+    STATE.filters.category = document.getElementById('catFilter').value;
+    STATE.filters.time = document.getElementById('dateFilter').value;
     renderEvents();
 };
+
+// --- 5. REGISTRATION & LOCALSTORAGE ---
+const initRegistration = () => {
+    const form = document.getElementById('membershipForm');
+    if (!form) return;
+
+    const inputs = ['regName', 'regEmail', 'regID'];
+
+    // Load Draft
+    inputs.forEach(id => {
+        const saved = localStorage.getItem(id);
+        if (saved) document.getElementById(id).value = saved;
+    });
+
+    // Auto-save
+    form.addEventListener('input', (e) => {
+        localStorage.setItem(e.target.id, e.target.value);
+    });
+
+    // Submit & Validation
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('regEmail').value;
+        
+        if (!email.includes('@')) {
+            showToast("❌ Invalid Email Format");
+            return;
+        }
+
+        showToast("🚀 Application Submitted!");
+        localStorage.clear();
+        form.reset();
+    });
+};
+
+// --- 6. INITIALIZATION ---
+document.addEventListener('DOMContentLoaded', () => {
+    renderEvents();
+    renderOfficers();
+    initRegistration();
+
+    const searchBar = document.getElementById('searchBar');
+    if (searchBar) {
+        searchBar.addEventListener('input', (e) => {
+            STATE.filters.search = e.target.value;
+            renderEvents();
+        });
+    }
+});
