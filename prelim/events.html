@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JPCS Events</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="logo">JPCS</div>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="officers.html">Officers</a></li>
+            <li><a href="events.html">Events</a></li>
+            <li><a href="register.html">Join Us</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h1>Upcoming Events</h1>
+        
+        <div style="margin: 1.5rem 0;">
+            <button class="btn" onclick="filterEvents('all')">All</button>
+            <button class="btn" onclick="filterEvents('tech')">Tech Talk</button>
+            <button class="btn" onclick="filterEvents('comp')">Competition</button>
+        </div>
+
+        <div id="event-list" class="grid">
+            <!-- JS will populate this -->
+        </div>
+    </div>
+
+    <!-- Modal Pop-up -->
+    <div id="eventModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle"></h2>
+            <hr style="margin: 1rem 0; border: 0.5px solid #444;">
+            <p id="modalDesc"></p>
+            <p style="margin-top: 1rem; color: var(--primary);" id="modalDate"></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

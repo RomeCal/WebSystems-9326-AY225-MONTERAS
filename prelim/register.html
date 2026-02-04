@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JPCS Registration</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="logo">JPCS</div>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="officers.html">Officers</a></li>
+            <li><a href="events.html">Events</a></li>
+            <li><a href="register.html">Join Us</a></li>
+        </ul>
+    </nav>
+
+    <div class="container" style="max-width: 600px;">
+        <h1>Apply for Membership</h1>
+        <p>Complete the form below. Your progress is saved automatically!</p>
+        
+        <form id="membershipForm">
+            <label>Full Name</label>
+            <input type="text" id="regName" placeholder="Juan Dela Cruz">
+            <p id="nameError" class="error-text">Please enter your full name (min 5 chars).</p>
+
+            <label>Email Address</label>
+            <input type="email" id="regEmail" placeholder="juan@student.edu.ph">
+            <p id="emailError" class="error-text">Please enter a valid email address.</p>
+
+            <label>Student ID</label>
+            <input type="text" id="regID" placeholder="2024-10001">
+
+            <label>Year Level</label>
+            <select id="regYear">
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
+            </select>
+
+            <button type="submit" class="btn" style="width: 100%; margin-top: 1rem;">Submit Application</button>
+        </form>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
