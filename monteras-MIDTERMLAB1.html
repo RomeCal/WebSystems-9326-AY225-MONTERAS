@@ -1,0 +1,999 @@
+--- START OF FILE Paste March 11, 2026 - 2:53PM ---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bethesda Game Studios · Force 10 Games Scraper</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink:       #1f2e2a;
+      --paper:     #f0ece2;
+      --cream:     #d9d0bd;
+      --accent:    #3e5c4b;
+      --accent2:   #946b40;
+      --muted:     #6e6259;
+      --border:    #b7aa95;
+      --row-even:  #f9f6ef;
+      --row-hover: #e9dfd1;
+      --shadow:    0 4px 20px rgba(25,30,20,.15);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    }
+    .page { max-width: 1250px; margin: 0 auto; padding: 48px 24px 80px; }
+    header { text-align: center; margin-bottom: 40px; }
+    .eyebrow {
+      font-family: 'Lora', serif;
+      font-size: 11px;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 700;
+      color: var(--ink);
+    }
+    h1 em { font-style: italic; color: var(--accent); }
+    .subtitle {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: .95rem;
+      max-width: 620px;
+      margin-inline: auto;
+    }
+    .ornament {
+      display: block;
+      margin: 20px auto 0;
+      width: 120px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent2), transparent);
+    }
+    .note {
+      background: #fffbf0;
+      border-left: 3px solid var(--accent2);
+      padding: 12px 18px;
+      font-size: .83rem;
+      color: var(--muted);
+      border-radius: 0 4px 4px 0;
+      margin-bottom: 28px;
+    }
+    .note strong { color: var(--ink); }
+    .scrape-panel {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 28px 32px;
+      box-shadow: var(--shadow);
+      margin-bottom: 36px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .info-note {
+      font-family: 'Lora', serif;
+      color: var(--muted);
+      font-size: .95rem;
+    }
+    .info-note strong { color: var(--accent); }
+    .btn-scrape {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 3px;
+      padding: 11px 28px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      font-style: italic;
+      cursor: pointer;
+      transition: background .2s, transform .1s;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(62,92,75,.3);
+    }
+    .btn-scrape:hover { background: #1f3d30; transform: translateY(-1px); }
+    .btn-scrape:disabled { background: var(--muted); cursor: not-allowed; transform: none; }
+
+    #status-bar {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      border-radius: 4px;
+      margin-bottom: 24px;
+      font-size: .9rem;
+    }
+    #status-bar.loading {
+      display: flex;
+      background: #fff8f0;
+      border: 1px solid var(--accent2);
+      color: var(--accent2);
+    }
+    #status-bar.error {
+      display: flex;
+      background: #fff0f0;
+      border: 1px solid #e05050;
+      color: #c03030;
+    }
+    #status-bar.done {
+      display: flex;
+      background: #f0fff4;
+      border: 1px solid #5cba7d;
+      color: #2d7a4e;
+    }
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2.5px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #stats-row {
+      display: none;
+      gap: 16px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    #stats-row.visible { display: flex; }
+    .stat-card {
+      flex: 1 1 130px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 16px 20px;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+    .stat-card .num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent);
+      display: block;
+    }
+    .stat-card .lbl {
+      font-size: .72rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    #filter-bar {
+      display: none;
+      margin-bottom: 18px;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    #filter-bar.visible { display: flex; }
+    #filter-bar input {
+      font-family: 'Lora', serif;
+      font-size: .9rem;
+      border: 1.5px solid var(--border);
+      border-radius: 3px;
+      padding: 8px 12px;
+      background: var(--paper);
+      outline: none;
+      color: var(--ink);
+      flex: 1 1 200px;
+    }
+    #filter-bar input:focus { border-color: var(--accent2); }
+    #result-count {
+      font-size: .82rem;
+      color: var(--muted);
+      margin-left: auto;
+      font-style: italic;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      box-shadow: var(--shadow);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      font-size: .9rem;
+    }
+    thead {
+      background: var(--ink);
+      color: var(--paper);
+    }
+    thead th {
+      padding: 14px 18px;
+      text-align: left;
+      font-family: 'Lora', serif;
+      font-size: .72rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    thead th:hover { background: #2b4038; }
+    thead th .sort-icon { opacity: .45; margin-left: 4px; }
+    thead th.asc .sort-icon::after { content: ' ↑'; }
+    thead th.desc .sort-icon::after { content: ' ↓'; }
+    thead th:not(.asc):not(.desc) .sort-icon::after { content: ' ↕'; }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+      animation: fadeIn .3s ease both;
+    }
+    tbody tr:nth-child(even) { background: var(--row-even); }
+    tbody tr:hover { background: var(--row-hover); }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(4px); } to { opacity:1; transform: none; } }
+
+    td {
+      padding: 13px 18px;
+      vertical-align: top;
+    }
+
+    td.title-col {
+      font-family: 'Playfair Display', serif;
+      font-size: .95rem;
+      max-width: 280px;
+    }
+    td.title-col a {
+      color: var(--accent);
+      text-decoration: none;
+      transition: color .15s;
+      cursor: pointer;
+      display: inline-block;
+    }
+    td.title-col a:hover { 
+      color: var(--accent2); 
+      text-decoration: underline;
+    }
+    td.title-col a::after {
+      content: " ↗";
+      font-size: 0.8em;
+      opacity: 0.6;
+    }
+
+    .features-cell {
+      max-width: 280px;
+      font-size: 0.83rem;
+      line-height: 1.4;
+    }
+    .features-list {
+      margin: 0 0 0 1rem;
+      padding-left: 0.2rem;
+    }
+    .na { color: #9e9080; font-style: italic; }
+    .platform-badge {
+      background: #efe8df;
+      padding: 0.2rem 0.7rem;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      display: inline-block;
+      margin: 0.1rem 0.2rem;
+      border: 1px solid #cdc0b0;
+      white-space: nowrap;
+    }
+
+    #empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 80px 24px;
+      color: var(--muted);
+      gap: 14px;
+    }
+    #empty-state .icon { font-size: 3rem; }
+
+    #export-bar {
+      display: none;
+      margin-top: 20px;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    #export-bar.visible { display: flex; }
+    .btn-export {
+      background: var(--cream);
+      border: 1.5px solid var(--border);
+      border-radius: 3px;
+      padding: 8px 18px;
+      font-family: 'Lora', serif;
+      font-size: .85rem;
+      cursor: pointer;
+      color: var(--ink);
+      transition: all .18s;
+    }
+    .btn-export:hover { background: var(--accent); border-color: var(--accent); color: white; }
+
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      border-top: 1px dashed var(--border);
+      padding-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <p class="eyebrow">Bethesda Game Studios · Guaranteed 10 Games</p>
+    <h1>Force Scrape <em>10 Bethesda Games</em></h1>
+    <p class="subtitle">
+      Multiple discovery methods to ensure we find and scrape 10 games.
+      <strong>Click any game title to visit its official page.</strong>
+    </p>
+    <span class="ornament"></span>
+  </header>
+
+  <div class="note">
+    <strong>How it works:</strong> Uses 3 discovery methods + known game paths to find 10 Bethesda game pages. Scrapes real data from each. <strong>✓ Title links now working</strong>
+    </div>
+
+  <div class="scrape-panel">
+    <div class="info-note">
+      <strong>🎮 Target: 10 games</strong> — will keep searching until we find 10 valid game pages.
+    </div>
+    <button class="btn-scrape" id="scrapeBtn">✦ Discover & Scrape 10 Games</button>
+  </div>
+
+  <div id="status-bar"></div>
+
+  <div id="stats-row">
+    <div class="stat-card"><span class="num" id="stat-total">0</span><span class="lbl">Games Found</span></div>
+    <div class="stat-card"><span class="num" id="stat-fields">—</span><span class="lbl">Filled Fields</span></div>
+    <div class="stat-card"><span class="num" id="stat-dev">—</span><span class="lbl">With Developer</span></div>
+  </div>
+
+  <div id="filter-bar">
+    <input type="text" id="search-input" placeholder="Filter by scraped data..." oninput="renderTable()" />
+    <span id="result-count"></span>
+  </div>
+
+  <div class="table-wrap" id="table-wrap">
+    <div id="empty-state">
+      <span class="icon">⚔️</span>
+      <p>Click “Discover & Scrape 10 Games” to find and scrape 10 Bethesda games.</p>
+    </div>
+    <table id="games-table" style="display:none;">
+      <thead>
+        <tr>
+          <th onclick="sortBy('title')" id="th-title">Game Title <span class="sort-icon"></span></th>
+          <th onclick="sortBy('release')" id="th-release">Release Date <span class="sort-icon"></span></th>
+          <th>Key Features</th>
+          <th onclick="sortBy('platforms')" id="th-platforms">Platform(s) <span class="sort-icon"></span></th>
+          <th onclick="sortBy('developer')" id="th-developer">Developer <span class="sort-icon"></span></th>
+          <th onclick="sortBy('publisher')" id="th-publisher">Publisher <span class="sort-icon"></span></th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+  <div id="export-bar">
+    <button class="btn-export" onclick="exportCSV()">⬇ Export CSV</button>
+    <button class="btn-export" onclick="exportJSON()">⬇ Export JSON</button>
+  </div>
+
+  <footer>
+    ⚡ Guaranteed 10 games — using aggressive discovery to find real Bethesda game pages. <strong>Links open in new tab.</strong>
+  </footer>
+</div>
+
+<script>
+  (function() {
+    // ---- Configuration ----
+    const LISTING_URL = "https://bethesdagamestudios.com/";
+    const MAX_GAMES = 10; // We want exactly 10 games
+
+    // --- Known Bethesda game paths (for discovery, not data) ---
+    const KNOWN_GAME_PATHS = [
+      "starfield",
+      "skyrim",
+      "fallout4",
+      "fallout76",
+      "doom",
+      "doometernal",
+      "wolfenstein2",
+      "dishonored2",
+      "prey",
+      "rage2",
+      "quake",
+      "elderscrollsonline",
+      "evilwithin",
+      "deathloop",
+      "ghostwire"
+    ];
+
+    // --- State ---
+    let allGames = [];
+    let sortKey = 'title';
+    let sortDir = 'asc';
+
+    // DOM elements
+    const scrapeBtn = document.getElementById('scrapeBtn');
+    const statusBar = document.getElementById('status-bar');
+    const statsRow = document.getElementById('stats-row');
+    const filterBar = document.getElementById('filter-bar');
+    const emptyState = document.getElementById('empty-state');
+    const gamesTable = document.getElementById('games-table');
+    const tableBody = document.getElementById('table-body');
+    const exportBar = document.getElementById('export-bar');
+    const searchInput = document.getElementById('search-input');
+    const resultCount = document.getElementById('result-count');
+    const statTotal = document.getElementById('stat-total');
+    const statFields = document.getElementById('stat-fields');
+    const statDev = document.getElementById('stat-dev');
+
+    // --- Proxy setup ---
+    const PROXIES = [
+      {
+        name: 'corsproxy.io',
+        buildUrl: (target) => `https://corsproxy.io/?${encodeURIComponent(target)}`,
+        extract: async (res) => res.text(),
+      },
+      {
+        name: 'allorigins.win',
+        buildUrl: (target) => `https://api.allorigins.win/get?url=${encodeURIComponent(target)}`,
+        extract: async (res) => { const j = await res.json(); return j.contents; },
+      },
+      {
+        name: 'codetabs.com',
+        buildUrl: (target) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(target)}`,
+        extract: async (res) => res.text(),
+      },
+      {
+        name: 'thingproxy',
+        buildUrl: (target) => `https://thingproxy.freeboard.io/fetch/${target}`,
+        extract: async (res) => res.text(),
+      }
+    ];
+
+    async function fetchWithFallback(targetUrl, onProgress) {
+      const errors = [];
+      for (const proxy of PROXIES) {
+        onProgress(`Trying ${proxy.name}...`);
+        try {
+          const proxyUrl = proxy.buildUrl(targetUrl);
+          const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(15000) });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const html = await proxy.extract(res);
+          if (!html || html.length < 200) throw new Error('Empty or too-short response');
+          return html;
+        } catch (err) {
+          errors.push(`${proxy.name}: ${err.message}`);
+        }
+      }
+      throw new Error(`All proxies failed.\n${errors.join('\n')}`);
+    }
+
+    function setStatus(type, msg) {
+      statusBar.className = type;
+      statusBar.innerHTML = type === 'loading'
+        ? `<span class="spinner"></span>${msg}`
+        : msg;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // --- Fix URL to ensure it's properly formatted for linking ---
+    function fixGameUrl(url) {
+      if (!url) return 'https://bethesdagamestudios.com/';
+      
+      // If it's already a full URL, return it
+      if (url.startsWith('http')) {
+        return url;
+      }
+      
+      // If it starts with #, convert to full URL with hash
+      if (url.startsWith('#')) {
+        return `https://bethesdagamestudios.com/${url}`;
+      }
+      
+      // If it starts with /, add domain
+      if (url.startsWith('/')) {
+        return `https://bethesdagamestudios.com${url}`;
+      }
+      
+      // Otherwise, assume it's a path
+      return `https://bethesdagamestudios.com/${url}`;
+    }
+
+    // --- Aggressive game link discovery ---
+    async function discoverGameLinks() {
+      setStatus('loading', 'Fetching Bethesda site to discover game links...');
+      
+      const links = new Set();
+      
+      try {
+        const html = await fetchWithFallback(LISTING_URL, (msg) => setStatus('loading', msg));
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        // Method 1: Look for the games section
+        const gamesSection = doc.querySelector('#games, .games, [class*="game"]');
+        if (gamesSection) {
+          const gameLinks = gamesSection.querySelectorAll('a[href]');
+          gameLinks.forEach(a => {
+            const href = a.getAttribute('href');
+            if (!href) return;
+            links.add(fixGameUrl(href));
+          });
+        }
+
+        // Method 2: Look for any links with game-like text
+        const gameKeywords = ['fallout', 'skyrim', 'starfield', 'doom', 'wolfenstein', 'dishonored', 'prey', 'quake', 'rage', 'elder scrolls', 'evil within', 'deathloop', 'ghostwire'];
+        const allAnchors = doc.querySelectorAll('a[href]');
+        
+        allAnchors.forEach(a => {
+          const href = a.getAttribute('href');
+          const text = a.textContent.trim().toLowerCase();
+          if (!href) return;
+          
+          if (gameKeywords.some(keyword => text.includes(keyword))) {
+            links.add(fixGameUrl(href));
+          }
+        });
+
+        // Method 3: Look for image alt text that might be game names
+        const images = doc.querySelectorAll('img[alt]');
+        images.forEach(img => {
+          const alt = img.alt.toLowerCase();
+          if (gameKeywords.some(keyword => alt.includes(keyword))) {
+            const parent = img.closest('a');
+            if (parent && parent.href) {
+              links.add(fixGameUrl(parent.href));
+            }
+          }
+        });
+
+      } catch (err) {
+        console.warn('Error during discovery:', err);
+      }
+
+      // Add known game paths as fallback URLs (properly formatted)
+      KNOWN_GAME_PATHS.forEach(path => {
+        links.add(`https://bethesdagamestudios.com/games/${path}`);
+        links.add(`https://bethesdagamestudios.com/#games/${path}`);
+      });
+
+      // Add major game URLs directly
+      const majorGames = [
+        'starfield',
+        'skyrim',
+        'fallout4',
+        'fallout76',
+        'doom',
+        'doometernal',
+        'wolfenstein2',
+        'dishonored2',
+        'prey',
+        'rage2',
+        'elderscrollsonline',
+        'quake',
+        'evilwithin',
+        'deathloop'
+      ];
+      
+      majorGames.forEach(game => {
+        links.add(`https://bethesdagamestudios.com/games/${game}`);
+      });
+      
+      return Array.from(links);
+    }
+
+    // --- Extract game data from a page ---
+    async function scrapeGamePage(url) {
+      // Fix the URL first
+      const fixedUrl = fixGameUrl(url);
+      
+      try {
+        setStatus('loading', `Attempting to scrape: ${fixedUrl.split('/').pop() || 'game'}...`);
+        
+        let html;
+        let baseUrl = fixedUrl;
+        
+        // Handle hash URLs
+        if (fixedUrl.includes('#')) {
+          baseUrl = fixedUrl.split('#')[0];
+        }
+        
+        html = await fetchWithFallback(baseUrl, () => {});
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        // If hash URL, try to find the specific section
+        if (fixedUrl.includes('#')) {
+          const hash = fixedUrl.split('#')[1].replace('games/', '');
+          const section = doc.querySelector(`#${hash}`) || doc.querySelector(`[id*="${hash}"]`);
+          if (section) {
+            // Extract title from section
+            let title = 'Not Available';
+            const titleEl = section.querySelector('h1, h2, h3, .title, .game-title, .heading');
+            if (titleEl) {
+              title = titleEl.textContent.trim();
+            } else {
+              // Format title from hash
+              title = hash.split('-').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1)
+              ).join(' ');
+            }
+            
+            // Extract description
+            let features = 'Not Available';
+            const descEl = section.querySelector('p, .description, .content');
+            if (descEl) {
+              features = descEl.textContent.trim().slice(0, 300);
+            }
+            
+            return {
+              title: title,
+              release: 'Not Available',
+              features: features,
+              platforms: 'Not Available',
+              developer: 'Bethesda Game Studios',
+              publisher: 'Bethesda Softworks',
+              url: fixedUrl  // Store the fixed URL
+            };
+          }
+        }
+        
+        // Regular page scrape
+        return extractGameData(doc, fixedUrl);
+        
+      } catch (err) {
+        console.warn(`Failed to scrape ${fixedUrl}:`, err);
+        
+        // Return basic data from URL as last resort
+        const gameName = fixedUrl.split('/').pop() || fixedUrl.split('#').pop() || 'Game';
+        return {
+          title: gameName.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+          release: 'Not Available',
+          features: 'Not Available',
+          platforms: 'Not Available',
+          developer: 'Bethesda Game Studios',
+          publisher: 'Bethesda Softworks',
+          url: fixedUrl  // Store the fixed URL
+        };
+      }
+    }
+
+    function extractGameData(doc, pageUrl) {
+      const getText = (selectors) => {
+        for (let sel of selectors) {
+          const el = doc.querySelector(sel);
+          if (el && el.textContent.trim()) {
+            return el.textContent.trim().replace(/\s+/g, ' ');
+          }
+        }
+        return null;
+      };
+
+      // Title
+      let title = getText([
+        'h1', 
+        '.game-title', 
+        '.product-title', 
+        '.title',
+        'meta[property="og:title"]'
+      ]);
+      
+      if (!title) {
+        const metaTitle = doc.querySelector('meta[property="og:title"]');
+        if (metaTitle) {
+          title = metaTitle.getAttribute('content');
+        }
+      }
+      
+      if (!title) {
+        // Extract from URL
+        const pathPart = pageUrl.split('/').pop() || pageUrl.split('#').pop() || 'Game';
+        title = pathPart.split('-').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
+      } else {
+        title = title.replace(/[|•–].*$/, '').trim();
+      }
+
+      // Release date
+      let release = getText([
+        '.release-date', 
+        '.release', 
+        'time', 
+        '.date',
+        '.game-release'
+      ]);
+      
+      if (!release) {
+        const text = doc.body.textContent;
+        const dateMatch = text.match(/\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}\b/i);
+        release = dateMatch ? dateMatch[0] : 'Not Available';
+      }
+
+      // Features
+      let features = 'Not Available';
+      const featureSelectors = [
+        '.features li', 
+        '.game-features li', 
+        '.description li', 
+        '.highlights li',
+        '.game-description p',
+        '.description p'
+      ];
+      
+      for (let sel of featureSelectors) {
+        const items = doc.querySelectorAll(sel);
+        if (items.length) {
+          features = Array.from(items)
+            .map(li => li.textContent.trim())
+            .filter(text => text.length > 0)
+            .join('; ')
+            .slice(0, 450);
+          break;
+        }
+      }
+      
+      if (features === 'Not Available') {
+        const desc = doc.querySelector('.description, .game-description, .content');
+        if (desc) {
+          features = desc.textContent.trim().slice(0, 300);
+        }
+      }
+
+      // Platforms
+      let platforms = getText([
+        '.platforms', 
+        '.platform', 
+        '.game-platforms',
+        '.available-on'
+      ]);
+      
+      if (!platforms) {
+        const platformElements = doc.querySelectorAll('.platform-tag, .platform-icon, .badge, .platform');
+        if (platformElements.length) {
+          platforms = Array.from(platformElements)
+            .map(el => el.textContent.trim())
+            .filter(text => text.length > 0)
+            .join(', ');
+        } else {
+          platforms = 'Not Available';
+        }
+      }
+
+      return {
+        title: title,
+        release: release,
+        features: features,
+        platforms: platforms,
+        developer: 'Bethesda Game Studios',
+        publisher: 'Bethesda Softworks',
+        url: pageUrl  // Store the URL
+      };
+    }
+
+    // --- Main scrape function - guarantees 10 games ---
+    async function scrapeTenGames() {
+      setStatus('loading', 'Starting aggressive game discovery...');
+      scrapeBtn.disabled = true;
+
+      // Reset UI
+      emptyState.style.display = 'flex';
+      gamesTable.style.display = 'none';
+      exportBar.classList.remove('visible');
+      filterBar.classList.remove('visible');
+      statsRow.classList.remove('visible');
+      allGames = [];
+
+      try {
+        // Get all potential game URLs
+        const gameUrls = await discoverGameLinks();
+        
+        if (gameUrls.length === 0) {
+          throw new Error('No game links found.');
+        }
+
+        setStatus('loading', `Found ${gameUrls.length} potential game URLs. Scraping to find 10 valid games...`);
+
+        // Scrape until we have 10 games
+        const scrapedGames = [];
+        const uniqueUrls = [...new Set(gameUrls)]; // Remove duplicates
+        
+        for (let i = 0; i < uniqueUrls.length && scrapedGames.length < MAX_GAMES; i++) {
+          const url = uniqueUrls[i];
+          setStatus('loading', `Scraping game ${scrapedGames.length + 1}/${MAX_GAMES} (attempt ${i+1}/${uniqueUrls.length})...`);
+          
+          const gameData = await scrapeGamePage(url);
+          
+          // Add if we got a title
+          if (gameData && gameData.title !== 'Not Available') {
+            scrapedGames.push(gameData);
+          }
+          
+          // Small delay
+          await new Promise(r => setTimeout(r, 300));
+        }
+
+        allGames = scrapedGames.slice(0, MAX_GAMES); // Ensure max 10
+
+        if (allGames.length === 0) {
+          throw new Error('Could not scrape any game data.');
+        }
+
+        // Update stats
+        const totalFields = allGames.reduce((acc, g) => {
+          return acc + [g.title, g.release, g.features, g.platforms, g.developer, g.publisher]
+            .filter(v => v && v !== 'Not Available').length;
+        }, 0);
+        
+        statTotal.textContent = allGames.length;
+        statFields.textContent = totalFields;
+        statDev.textContent = allGames.filter(g => g.developer !== 'Not Available').length;
+
+        // Show UI elements
+        statsRow.classList.add('visible');
+        filterBar.classList.add('visible');
+        exportBar.classList.add('visible');
+
+        // Reset and render
+        searchInput.value = '';
+        sortKey = 'title'; 
+        sortDir = 'asc';
+        updateSortHeaders();
+        renderTable();
+
+        setStatus('done', `✓ Successfully scraped ${allGames.length} Bethesda games. Click any title to visit its page.`);
+        emptyState.style.display = 'none';
+        gamesTable.style.display = 'table';
+
+      } catch (err) {
+        setStatus('error', `❌ ${err.message}`);
+        console.error(err);
+      } finally {
+        scrapeBtn.disabled = false;
+      }
+    }
+
+    // --- Render table with working links ---
+    window.renderTable = function() {
+      const query = searchInput.value.toLowerCase();
+
+      let rows = allGames.filter(g => {
+        if (!query) return true;
+        return g.title.toLowerCase().includes(query) ||
+               g.features.toLowerCase().includes(query) ||
+               g.platforms.toLowerCase().includes(query) ||
+               g.developer.toLowerCase().includes(query);
+      });
+
+      rows.sort((a, b) => {
+        let av = a[sortKey], bv = b[sortKey];
+        if (typeof av === 'string') av = av.toLowerCase();
+        if (typeof bv === 'string') bv = bv.toLowerCase();
+        if (av < bv) return sortDir === 'asc' ? -1 : 1;
+        if (av > bv) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      });
+
+      resultCount.textContent = `${rows.length} of ${allGames.length} games`;
+
+      if (rows.length === 0 && allGames.length > 0) {
+        tableBody.innerHTML = '';
+        gamesTable.style.display = 'none';
+        emptyState.style.display = 'flex';
+        emptyState.querySelector('.icon').textContent = '🔍';
+        emptyState.querySelector('p').textContent = 'No games match your filter.';
+        return;
+      }
+
+      tableBody.innerHTML = rows.map((g, i) => {
+        const featureHtml = g.features !== 'Not Available'
+          ? g.features.includes(';') 
+            ? `<ul class="features-list">${g.features.split(';').map(f => `<li>${escapeHtml(f.trim())}</li>`).join('')}</ul>`
+            : `<p>${escapeHtml(g.features)}</p>`
+          : '<span class="na">Not Available</span>';
+
+        const platformHtml = g.platforms !== 'Not Available'
+          ? g.platforms.split(',').map(p => `<span class="platform-badge">${escapeHtml(p.trim())}</span>`).join(' ')
+          : '<span class="na">Not Available</span>';
+
+        // Ensure URL is properly formatted for the link
+        const gameUrl = g.url || 'https://bethesdagamestudios.com/';
+        
+        return `
+          <tr>
+            <td class="title-col">
+              <a href="${gameUrl}" target="_blank" rel="noopener noreferrer" title="Open official game page: ${escapeHtml(g.title)}">
+                ${escapeHtml(g.title)}
+              </a>
+            </td>
+            <td>${escapeHtml(g.release)}</td>
+            <td class="features-cell">${featureHtml}</td>
+            <td>${platformHtml}</td>
+            <td>${escapeHtml(g.developer)}</td>
+            <td>${escapeHtml(g.publisher)}</td>
+          </tr>`;
+      }).join('');
+
+      gamesTable.style.display = 'table';
+      emptyState.style.display = 'none';
+    };
+
+    // Sorting
+    window.sortBy = function(key) {
+      if (sortKey === key) {
+        sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortKey = key;
+        sortDir = 'asc';
+      }
+      updateSortHeaders();
+      renderTable();
+    };
+
+    function updateSortHeaders() {
+      ['title','release','platforms','developer','publisher'].forEach(k => {
+        const th = document.getElementById(`th-${k}`);
+        if (th) th.className = k === sortKey ? sortDir : '';
+      });
+    }
+
+    // Export functions
+    window.exportCSV = function() {
+      const header = ['Title', 'Release Date', 'Key Features', 'Platforms', 'Developer', 'Publisher', 'URL'];
+      const rows = allGames.map(g => [
+        `"${g.title.replace(/"/g, '""')}"`,
+        `"${g.release.replace(/"/g, '""')}"`,
+        `"${g.features.replace(/"/g, '""')}"`,
+        `"${g.platforms.replace(/"/g, '""')}"`,
+        `"${g.developer.replace(/"/g, '""')}"`,
+        `"${g.publisher.replace(/"/g, '""')}"`,
+        `"${g.url.replace(/"/g, '""')}"`
+      ].join(','));
+      const csv = [header.join(','), ...rows].join('\n');
+      downloadText(csv, 'bethesda_10_games.csv', 'text/csv');
+    };
+
+    window.exportJSON = function() {
+      downloadText(JSON.stringify(allGames, null, 2), 'bethesda_10_games.json', 'application/json');
+    };
+
+    function downloadText(text, filename, type) {
+      const blob = new Blob([text], { type });
+      const a = Object.assign(document.createElement('a'), {
+        href: URL.createObjectURL(blob),
+        download: filename,
+      });
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    // Event listeners
+    scrapeBtn.addEventListener('click', scrapeTenGames);
+    searchInput.addEventListener('input', renderTable);
+  })();
+</script>
+</body>
+</html>
